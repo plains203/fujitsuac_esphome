@@ -374,6 +374,15 @@ void FujitsuAC::update_registers_(const uint8_t *buf, size_t len) {
       this->regs_[addr] = value;
     }
   }
+
+  // Periodic raw dump of key regs even when unchanged, to distinguish
+  // "AC reports a constant" from "we stopped hearing from the AC".
+  const uint32_t now = millis();
+  if (now - this->last_raw_dump_ms_ > 60000) {
+    this->last_raw_dump_ms_ = now;
+    ESP_LOGD(TAG, "Raw: actual=0x%04X outdoor=0x%04X power=%u mode=%u", this->get_reg_(REG_ACTUAL_TEMP),
+             this->get_reg_(REG_OUTDOOR_TEMP), this->get_reg_(REG_POWER), this->get_reg_(REG_MODE));
+  }
 }
 
 // ---------------------------------------------------------------------------
