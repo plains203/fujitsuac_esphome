@@ -11,7 +11,6 @@
 substitutions:
   name: "fujitsu-ac"
   friendly_name: "Fujitsu AC"
-  board: "esp32s3"
   rx_pin: "GPIO16"
   tx_pin: "GPIO17"
   # Per-device secrets (override in each devices/*.yaml, values from secrets.yaml)
@@ -23,7 +22,7 @@ esphome:
   friendly_name: ${friendly_name}
 
 esp32:
-  board: ${board}
+  variant: esp32s3
   framework:
     type: esp-idf
 
