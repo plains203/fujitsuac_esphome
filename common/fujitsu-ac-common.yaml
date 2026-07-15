@@ -41,7 +41,7 @@ external_components:
       type: git
       url: https://github.com/plains203/fujitsuac_esphome
       ref: main
-      refresh: 1d   # uncomment to auto re-pull; otherwise ESPHome caches the clone
+    refresh: 1s   # ← sibling of source:, not inside it
     components: [fujitsu_ac]
 
 uart:
