@@ -21,9 +21,10 @@ esphome:
   name: ${name}
   friendly_name: ${friendly_name}
 
-wifi:
-  ssid: !secret wifi_ssid
-  password: !secret wifi_password
+#wifi:
+#  ssid: !secret wifi_ssid
+#  password: !secret wifi_password
+  
 
 api:
   encryption:
