@@ -1,7 +1,7 @@
 substitutions:
   name: "lounge-ac"
   friendly_name: "Lounge AC"
-  board: "esp32dev"
+  board: "esp32s3"
   rx_pin: "GPIO16"
   tx_pin: "GPIO17"
   api_encryption_key: !secret lounge_ac_api_key
