@@ -1,0 +1,94 @@
+# Fujitsu AC over UART (UTY-TFSXW1 protocol) — example config
+#
+# Hardware (matching the upstream dongle wiring on a 30-pin ESP32):
+#   AC pin 1 (+12V) -> buck converter -> 5V
+#   AC pin 2 (GND)  -> GND
+#   AC pin 3 (DATA, AC->ESP) -> GPIO16 via logic level shifter
+#   AC pin 4 (DATA, ESP->AC) -> GPIO17 via logic level shifter
+#
+# !!! Never connect the AC's GND to anything earth-referenced (e.g. a
+# laptop) while the AC is plugged in — the AC UART is not isolated.
+
+esphome:
+  name: fujitsu-lounge
+  friendly_name: Lounge AC
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+api:
+ota:
+  - platform: esphome
+logger:
+  # Default UART0 logging is fine — the AC is on UART2 (GPIO16/17).
+  level: DEBUG
+
+external_components:
+  - source:
+      type: local
+      path: components
+    components: [fujitsu_ac]
+
+uart:
+  id: ac_uart
+  baud_rate: 9600
+  # CRITICAL: the Fujitsu bus is inverted-logic UART. Without inverted: true
+  # on BOTH pins the handshake will never complete.
+  rx_pin:
+    number: GPIO16
+    inverted: true
+  tx_pin:
+    number: GPIO17
+    inverted: true
+
+fujitsu_ac:
+  id: lounge_ac
+  uart_id: ac_uart
+  # Upstream has never tested writing the minimum-heat register; state is
+  # always readable, but writes are refused unless you opt in:
+  # enable_minimum_heat_control: true
+
+climate:
+  - platform: fujitsu_ac
+    fujitsu_ac_id: lounge_ac
+    name: ""            # takes the device friendly name
+
+sensor:
+  - platform: fujitsu_ac
+    fujitsu_ac_id: lounge_ac
+    outdoor_temperature:
+      name: Outdoor Temperature
+    indoor_temperature:
+      name: Indoor Temperature
+
+select:
+  - platform: fujitsu_ac
+    fujitsu_ac_id: lounge_ac
+    vertical_airflow:
+      name: Vertical Airflow
+    horizontal_airflow:
+      name: Horizontal Airflow
+
+switch:
+  - platform: fujitsu_ac
+    fujitsu_ac_id: lounge_ac
+    powerful:
+      name: Powerful
+    economy:
+      name: Economy
+    energy_saving_fan:
+      name: Energy Saving Fan
+    outdoor_unit_low_noise:
+      name: Outdoor Unit Low Noise
+    coil_dry:
+      name: Coil Dry
+    human_sensor:
+      name: Human Sensor
+    # minimum_heat:
+    #   name: Minimum Heat
