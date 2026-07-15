@@ -54,6 +54,70 @@ Copy `components/fujitsu_ac` next to your YAML and use
 `external_components` with a local source (see `fujitsu-ac-example.yaml`),
 or host it in a git repo and point `source` at that.
 
+## Multiple ACs: shared package + substitutions
+
+If you have more than one Fujitsu AC, don't copy-paste the platform config
+into every device's YAML — use ESPHome's `packages:` + `substitutions:`
+instead, so a sensor rename/add/removal is a single edit that every device
+picks up on its next compile.
+
+```
+fujitsu_ac_esphome/
+  common/
+    fujitsu-ac-common.yaml   # all entities + uart/external_components — edit here
+  devices/
+    lounge.yaml              # ~10 lines: name, board, pins, secrets
+    bedroom.yaml
+    secrets.yaml              # wifi + per-device api key / ota password
+```
+
+`common/fujitsu-ac-common.yaml` holds everything: `external_components`,
+`uart`, the `fujitsu_ac` hub, and the `climate` / `sensor` / `select` /
+`switch` blocks — all parameterised with `${...}` substitutions.
+
+Each file in `devices/` is just:
+
+```yaml
+substitutions:
+  name: "lounge-ac"
+  friendly_name: "Lounge AC"
+  board: "esp32dev"
+  rx_pin: "GPIO16"
+  tx_pin: "GPIO17"
+  api_encryption_key: !secret lounge_ac_api_key
+  ota_password: !secret lounge_ac_ota_password
+
+packages:
+  fujitsu_ac: !include ../common/fujitsu-ac-common.yaml
+```
+
+Substitutions declared in the device file override the defaults of the
+same name in the package — that's the whole mechanism. Compile/flash each
+device the normal way, just pointed at its own file:
+
+```
+esphome run devices/lounge.yaml
+esphome run devices/bedroom.yaml
+```
+
+To add a sensor for every AC at once, add it once under `sensor:` in
+`fujitsu-ac-common.yaml`, then re-run/upload each `devices/*.yaml` — no
+per-device edits needed. This was validated end-to-end (two devices with
+different boards/pins, package merge, and a common-file edit propagating to
+both) against ESPHome 2026.6.5.
+
+`secrets.yaml` must live next to the files you actually compile (i.e. in
+`devices/`, since that's what you pass to `esphome run`) — see
+`devices/secrets.yaml.example`.
+
+If you'd rather not maintain `components/fujitsu_ac` locally, the
+`external_components` block in the common package can point at a git repo
+instead (see the `type: git` example already in `fujitsu-ac-common.yaml`).
+You can do the same for the package itself — `packages:` supports a `git`
+source with the same `url`/`ref`/`refresh` fields, so the whole
+`fujitsu-ac-common.yaml` can live in a shared repo too if you want it
+versioned separately from your per-device configs.
+
 ## Differences from / fixes to the original UART code
 
 The frame parser here is a hardened rewrite of `Buffer.cpp`:

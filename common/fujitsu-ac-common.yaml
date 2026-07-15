@@ -1,0 +1,108 @@
+# Shared Fujitsu AC package.
+#
+# Every device-specific file in ../devices/ includes this via `packages:`
+# and only overrides the substitutions below. Add, rename, or remove a
+# sensor/select/switch HERE and every AC picks it up on its next compile —
+# nothing in devices/*.yaml needs to change.
+#
+# Defaults here are placeholders; every device file overrides name,
+# friendly_name, rx_pin, tx_pin, and the two secrets.
+
+substitutions:
+  name: "fujitsu-ac"
+  friendly_name: "Fujitsu AC"
+  board: "esp32dev"
+  rx_pin: "GPIO16"
+  tx_pin: "GPIO17"
+  # Per-device secrets (override in each devices/*.yaml, values from secrets.yaml)
+  api_encryption_key: ""
+  ota_password: ""
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+esp32:
+  board: ${board}
+  framework:
+    type: esp-idf
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+api:
+  encryption:
+    key: ${api_encryption_key}
+ota:
+  - platform: esphome
+    password: ${ota_password}
+
+logger:
+  level: DEBUG
+
+external_components:
+  - source:
+      type: git
+      url: https://github.com/plains203/fujitsuac_esphome
+      ref: main
+      # refresh: 1d   # uncomment to auto re-pull; otherwise ESPHome caches the clone
+    components: [fujitsu_ac]
+
+uart:
+  id: ac_uart
+  baud_rate: 9600
+  # CRITICAL: the Fujitsu bus is inverted-logic UART — both pins need
+  # inverted: true or the handshake will never complete.
+  rx_pin:
+    number: ${rx_pin}
+    inverted: true
+  tx_pin:
+    number: ${tx_pin}
+    inverted: true
+
+fujitsu_ac:
+  id: ac_hub
+  uart_id: ac_uart
+  # enable_minimum_heat_control: true   # untested upstream, off by default
+
+# --- Entities: edit here, applies to every AC on next compile ---------------
+
+climate:
+  - platform: fujitsu_ac
+    fujitsu_ac_id: ac_hub
+    name: ""          # takes the device friendly_name
+
+sensor:
+  - platform: fujitsu_ac
+    fujitsu_ac_id: ac_hub
+    outdoor_temperature:
+      name: Outdoor Temperature
+    indoor_temperature:
+      name: Indoor Temperature
+
+select:
+  - platform: fujitsu_ac
+    fujitsu_ac_id: ac_hub
+    vertical_airflow:
+      name: Vertical Airflow
+    horizontal_airflow:
+      name: Horizontal Airflow
+
+switch:
+  - platform: fujitsu_ac
+    fujitsu_ac_id: ac_hub
+    powerful:
+      name: Powerful
+    economy:
+      name: Economy
+    energy_saving_fan:
+      name: Energy Saving Fan
+    outdoor_unit_low_noise:
+      name: Outdoor Unit Low Noise
+    coil_dry:
+      name: Coil Dry
+    human_sensor:
+      name: Human Sensor
+    # minimum_heat:
+    #   name: Minimum Heat

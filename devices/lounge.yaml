@@ -1,0 +1,11 @@
+substitutions:
+  name: "lounge-ac"
+  friendly_name: "Lounge AC"
+  board: "esp32dev"
+  rx_pin: "GPIO16"
+  tx_pin: "GPIO17"
+  api_encryption_key: !secret lounge_ac_api_key
+  ota_password: !secret lounge_ac_ota_password
+
+packages:
+  fujitsu_ac: !include ../common/fujitsu-ac-common.yaml

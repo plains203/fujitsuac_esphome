@@ -31,9 +31,12 @@ logger:
 
 external_components:
   - source:
-      type: local
-      path: components
+      type: git
+      url: https://github.com/plains203/fujitsuac_esphome
+      ref: main
     components: [fujitsu_ac]
+    # refresh: 1d   # uncomment while developing to re-pull on every build;
+                    # ESPHome otherwise caches the repo checkout
 
 uart:
   id: ac_uart
