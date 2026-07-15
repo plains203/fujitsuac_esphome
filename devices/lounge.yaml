@@ -1,11 +1,22 @@
 substitutions:
   name: "lounge-ac"
   friendly_name: "Lounge AC"
-  board: "esp32s3"
   rx_pin: "GPIO16"
   tx_pin: "GPIO17"
   api_encryption_key: !secret lounge_ac_api_key
   ota_password: !secret lounge_ac_ota_password
 
+esp32:
+  variant: esp32s3
+  framework:
+    type: esp-idf
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
 packages:
-  fujitsu_ac: !include ../common/fujitsu-ac-common.yaml
+  remote_config:
+    url: https://github.com/plains203/fujitsuac_esphome
+    files: [common/fujitsu-ac-common.yaml]
+    refresh: 1s # Forces ESPHome to watch and grab fresh Git changes
