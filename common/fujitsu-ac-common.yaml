@@ -13,7 +13,6 @@ substitutions:
   friendly_name: "Fujitsu AC"
   rx_pin: "GPIO16"
   tx_pin: "GPIO17"
-  board: "esp32s3"
   # Per-device secrets (override in each devices/*.yaml, values from secrets.yaml)
   api_encryption_key: ""
   ota_password: ""
@@ -21,11 +20,6 @@ substitutions:
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
-
-esp32:
-  variant: ${board}
-  framework:
-    type: esp-idf
 
 wifi:
   ssid: !secret wifi_ssid
