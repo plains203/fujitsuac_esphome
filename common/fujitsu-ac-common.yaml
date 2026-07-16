@@ -40,7 +40,7 @@ external_components:
   - source:
       type: git
       url: https://github.com/plains203/fujitsuac_esphome
-      ref: main
+      ref: debug
     refresh: 1s   # ← sibling of source:, not inside it
     components: [fujitsu_ac]
 
