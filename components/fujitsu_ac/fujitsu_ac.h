@@ -63,6 +63,15 @@ enum Reg : uint16_t {
   REG_OUTDOOR_LOW_NOISE = 0x1121,
   REG_COIL_DRY = 0x1144,
   REG_OUTDOOR_TEMP = 0x2020,   // (raw - 5025) / 100 degC
+  // Read-side vertical louvre position (0x20 = swing). NOT a fixed physical
+  // angle: field-tested on real hardware and confirmed the AC firmware
+  // restricts vertical range by active mode (COOL blocks the two steepest
+  // downward angles; HEAT blocks the two steepest upward angles) and always
+  // renumbers whatever's currently reachable as 1..REG_V_AIRFLOW_COUNT. So
+  // "Position 1" is a different physical angle in COOL vs HEAT — the IR
+  // remote can reach all 6 physical stops, this register only ever reports
+  // the mode-appropriate subset. No fix needed: writes/reads already pass
+  // the AC's own relative index straight through, which is correct.
 };
 
 // Mode register values
